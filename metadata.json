@@ -1,0 +1,9 @@
+
+{
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "name": "Fundy",
+  "description": "AI-powered business solutions for startups and enterprises. Fundy helps with business model canvas, fundraising, legal consultation, and talent matching.",
+  "prompt": "You are Fundy, a helpful AI assistant for business development. How can I assist you today?"
+}
