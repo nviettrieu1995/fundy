@@ -1,6 +1,36 @@
 import { User, UserMembershipType, WorkerMembershipType } from '../types';
 import { DEFAULT_AVATAR_URL, MOCK_USER_EMAIL, MOCK_USER_PASSWORD, MOCK_WORKER_EMAIL, MOCK_WORKER_PASSWORD, MOCK_ADMIN_EMAIL, MOCK_ADMIN_PASSWORD, USER_MEMBERSHIP_PLANS, WORKER_MEMBERSHIP_PLANS } from '../constants';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
+export const apiLogin = async (email: string, password: string): Promise<string | null> => {
+  try {
+    const res = await fetch(`${API_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.token as string;
+  } catch {
+    return null;
+  }
+};
+
+export const apiRegister = async (name: string, email: string, password: string): Promise<boolean> => {
+  try {
+    const res = await fetch(`${API_URL}/api/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+};
+
 // Simulate a database of users
 const users: User[] = [
   {
