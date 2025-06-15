@@ -1,4 +1,4 @@
-import { UserMembershipType, WorkerMembershipType } from "./types";
+import { UserMembershipType, WorkerMembershipType, UserMembershipPlan } from "./types";
 
 export const APP_NAME = "Fundy"; // Updated App Name
 export const DEFAULT_AVATAR_URL = "https://picsum.photos/200";
@@ -14,7 +14,7 @@ export const BANK_DETAILS = {
 
 export const CREDIT_PRICE_VND = 240; // 1 credit = 240 VND
 
-export const USER_MEMBERSHIP_PLANS = {
+export let USER_MEMBERSHIP_PLANS: Record<UserMembershipType, UserMembershipPlan> = {
   [UserMembershipType.Free]: { 
     name: "Miễn Phí",
     price: 0,
@@ -46,6 +46,20 @@ export const USER_MEMBERSHIP_PLANS = {
     ],
   },
 };
+
+export async function loadUserMembershipPlans() {
+  try {
+    const res = await fetch('http://localhost:3001/api/memberships');
+    if (!res.ok) throw new Error('Failed to fetch membership plans');
+    const plans: UserMembershipPlan[] = await res.json();
+    USER_MEMBERSHIP_PLANS = plans.reduce((acc, plan) => {
+      acc[plan.key as UserMembershipType] = plan;
+      return acc;
+    }, {} as Record<UserMembershipType, UserMembershipPlan>);
+  } catch (err) {
+    console.error('Unable to load membership plans', err);
+  }
+}
 
 export const WORKER_MEMBERSHIP_PLANS = {
   [WorkerMembershipType.WorkerAdvanced]: {

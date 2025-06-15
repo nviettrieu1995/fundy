@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
 import { HashRouter } from 'react-router-dom';
+import { loadUserMembershipPlans } from './constants';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -11,13 +12,15 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <HashRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </HashRouter>
-  </React.StrictMode>
-);
+loadUserMembershipPlans().finally(() => {
+  root.render(
+    <React.StrictMode>
+      <HashRouter>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </HashRouter>
+    </React.StrictMode>
+  );
+});
     

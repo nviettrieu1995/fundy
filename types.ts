@@ -179,3 +179,10 @@ export interface WorkerMembershipPlan {
   price: number;
   features: string[];
 }
+
+export interface UserMembershipPlan {
+  key: UserMembershipType;
+  name: string;
+  price: number;
+  features: string[];
+}
