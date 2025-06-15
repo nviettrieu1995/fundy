@@ -22,25 +22,12 @@ const DashboardOverviewSection: React.FC<DashboardOverviewSectionProps> = ({ set
     return <LoadingSpinner message="Loading user data..." />;
   }
 
-  const handleAddCreditsSuccess = (amount: number) => {
-    if (user) {
-      updateUser({ credits: (user.credits || 0) + amount });
-    }
+  const handleAddCreditsSuccess = (_amount: number) => {
+    // User state is updated in AuthContext
   };
 
-  const handleUpgradeMembershipSuccess = (newMembershipPlanKey: any) => { // Assuming this key is UserMembershipType
-     if (user) {
-        // Find plan name from USER_MEMBERSHIP_PLANS based on key
-        // This part depends on what onPaymentSuccess actually returns.
-        // For now, let's assume it returns the key, and we update the membership enum and plan name.
-        const planDetails = (USER_MEMBERSHIP_PLANS as any)[newMembershipPlanKey];
-        if (planDetails) {
-            updateUser({ 
-                membership: newMembershipPlanKey, // The enum key
-                membershipPlanName: planDetails.name 
-            });
-        }
-    }
+  const handleUpgradeMembershipSuccess = (_newMembershipPlanKey: any) => {
+    // User state updated in AuthContext
   };
 
   const handleAskAssistant = () => {
