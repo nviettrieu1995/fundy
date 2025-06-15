@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { User, UserMembershipType } from '../types'; // UserMembershipType is the enum for user.membership
-import { mockLogin, mockLogout, mockRegister } from '../services/authService';
+import { login as apiLogin, logout as apiLogout, register as apiRegister } from '../services/authService';
 import { USER_MEMBERSHIP_PLANS } from '../constants'; // For default plan name
 
 interface AuthContextType {
@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, pass: string) => {
     setLoading(true);
     try {
-      const result = await mockLogin(email, pass);
+      const result = await apiLogin(email, pass);
       if (result) {
         localStorage.setItem('authUser', JSON.stringify(result));
         setUser(result);
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = useCallback(async () => {
     setLoading(true);
-    await mockLogout();
+    await apiLogout();
     localStorage.removeItem('authUser');
     setUser(null);
     setLoading(false);
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = useCallback(async (name: string, email: string, pass: string) => {
     setLoading(true);
-    const result = await mockRegister(name, email, pass);
+    const result = await apiRegister(name, email, pass);
     if (result) {
       localStorage.setItem('authUser', JSON.stringify(result));
       setUser(result);
