@@ -179,3 +179,12 @@ export interface WorkerMembershipPlan {
   price: number;
   features: string[];
 }
+
+export interface Transaction {
+  id: string;
+  userId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+}
