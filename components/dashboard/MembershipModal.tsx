@@ -5,6 +5,7 @@ import Button from '../common/Button';
 import { USER_MEMBERSHIP_PLANS, BANK_DETAILS } from '../../constants';
 import { UserMembershipType } from '../../types';
 import { CheckCircleIcon } from '../common/Icon';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MembershipModalProps {
   isOpen: boolean;
@@ -15,8 +16,12 @@ interface MembershipModalProps {
 type PlanKey = UserMembershipType; // Use the enum type for keys
 
 const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onPaymentSuccess }) => {
+  const { user, upgradeMembershipPlan } = useAuth();
   const [selectedPlanKey, setSelectedPlanKey] = useState<PlanKey | null>(null);
   const [paymentStep, setPaymentStep] = useState(1); // 1: select plan, 2: payment info
+  const [statusMsg, setStatusMsg] = useState('');
+  const [statusType, setStatusType] = useState<'success' | 'error' | ''>('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSelectPlan = (planKey: PlanKey) => {
     setSelectedPlanKey(planKey);
@@ -25,13 +30,18 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onPa
 
   const selectedPlanDetails = selectedPlanKey ? USER_MEMBERSHIP_PLANS[selectedPlanKey] : null;
 
-  const handleConfirmPayment = () => {
-    if (!selectedPlanKey || !selectedPlanDetails) return;
-    alert(`Nâng cấp thành công lên gói ${selectedPlanDetails.name} (mô phỏng).`);
-    onPaymentSuccess(selectedPlanKey); // Pass the key
-    setPaymentStep(1);
-    setSelectedPlanKey(null);
-    onClose();
+  const handleConfirmPayment = async () => {
+    if (!selectedPlanKey || !selectedPlanDetails || !user) return;
+    setIsProcessing(true);
+    setStatusMsg('Đang xử lý thanh toán...');
+    setStatusType('');
+    const res = await upgradeMembershipPlan(selectedPlanKey);
+    setIsProcessing(false);
+    setStatusMsg(res.message);
+    setStatusType(res.success ? 'success' : 'error');
+    if (res.success) {
+      onPaymentSuccess(selectedPlanKey);
+    }
   };
 
   // Get plan values (objects) and their keys (UserMembershipType)
@@ -81,13 +91,16 @@ const MembershipModal: React.FC<MembershipModalProps> = ({ isOpen, onClose, onPa
             Hệ thống sẽ tự động cập nhật gói sau khi nhận được thanh toán.
           </p>
           <div className="flex space-x-2">
-            <Button onClick={() => {setPaymentStep(1); setSelectedPlanKey(null);}} variant="outline" className="w-full">
+            <Button onClick={() => {setPaymentStep(1); setSelectedPlanKey(null);}} variant="outline" className="w-full" disabled={isProcessing}>
               Chọn gói khác
             </Button>
-            <Button onClick={handleConfirmPayment} variant="primary" className="w-full">
-              Đã chuyển khoản
+            <Button onClick={handleConfirmPayment} variant="primary" className="w-full" disabled={isProcessing}>
+              {isProcessing ? 'Đang xử lý...' : 'Đã chuyển khoản'}
             </Button>
           </div>
+          {statusMsg && (
+            <p className={`text-sm ${statusType === 'success' ? 'text-green-600' : 'text-red-600'}`}>{statusMsg}</p>
+          )}
         </div>
       )}
     </Modal>

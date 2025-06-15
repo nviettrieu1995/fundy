@@ -34,18 +34,12 @@ const ProfileDropdown: React.FC = () => {
     navigate('/login');
   };
   
-  const handleAddCreditsSuccess = (amount: number) => {
-    updateUser({ credits: (user.credits || 0) + amount });
+  const handleAddCreditsSuccess = (_amount: number) => {
+    // State updated in AuthContext
   };
 
-  const handleUpgradeUserMembershipSuccess = (newMembershipPlanKey: UserMembershipType) => {
-    const planDetails = USER_MEMBERSHIP_PLANS[newMembershipPlanKey];
-    if (planDetails) {
-        updateUser({ 
-            membership: newMembershipPlanKey, // The enum key
-            membershipPlanName: planDetails.name 
-        });
-    }
+  const handleUpgradeUserMembershipSuccess = (_newMembershipPlanKey: UserMembershipType) => {
+    // State updated in AuthContext
   };
 
   const handleUpgradeWorkerMembershipSuccess = (newMembershipPlanKey: WorkerMembershipType) => {

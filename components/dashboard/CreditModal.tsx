@@ -4,6 +4,7 @@ import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import { CREDIT_PRICE_VND, BANK_DETAILS } from '../../constants';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface CreditModalProps {
   isOpen: boolean;
@@ -12,8 +13,12 @@ interface CreditModalProps {
 }
 
 const CreditModal: React.FC<CreditModalProps> = ({ isOpen, onClose, onPaymentSuccess }) => {
+  const { user, purchaseCredits } = useAuth();
   const [creditAmount, setCreditAmount] = useState(10); // Default 10 credits
   const [paymentStep, setPaymentStep] = useState(1); // 1: select amount, 2: payment info
+  const [statusMsg, setStatusMsg] = useState<string>('');
+  const [statusType, setStatusType] = useState<'success' | 'error' | ''>('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const totalCost = creditAmount * CREDIT_PRICE_VND;
 
@@ -22,14 +27,19 @@ const CreditModal: React.FC<CreditModalProps> = ({ isOpen, onClose, onPaymentSuc
       setPaymentStep(2);
     }
   };
-  
-  const handleConfirmPayment = () => {
-    // Simulate payment confirmation
-    alert(`Thanh toán thành công (mô phỏng). ${creditAmount} credits sẽ được thêm vào tài khoản của bạn.`);
-    onPaymentSuccess(creditAmount);
-    setPaymentStep(1); // Reset for next time
-    setCreditAmount(10);
-    onClose();
+
+  const handleConfirmPayment = async () => {
+    if (!user) return;
+    setIsProcessing(true);
+    setStatusMsg('Đang xử lý thanh toán...');
+    setStatusType('');
+    const res = await purchaseCredits(creditAmount);
+    setIsProcessing(false);
+    setStatusMsg(res.message);
+    setStatusType(res.success ? 'success' : 'error');
+    if (res.success) {
+      onPaymentSuccess(creditAmount);
+    }
   }
 
   return (
@@ -68,13 +78,16 @@ const CreditModal: React.FC<CreditModalProps> = ({ isOpen, onClose, onPaymentSuc
             Lưu ý: Hệ thống sẽ tự động cập nhật credit sau khi nhận được thanh toán. Vui lòng ghi đúng nội dung chuyển khoản.
           </p>
           <div className="flex space-x-2">
-            <Button onClick={() => setPaymentStep(1)} variant="outline" className="w-full">
+            <Button onClick={() => setPaymentStep(1)} variant="outline" className="w-full" disabled={isProcessing}>
               Quay lại
             </Button>
-            <Button onClick={handleConfirmPayment} variant="primary" className="w-full">
-              Đã chuyển khoản
+            <Button onClick={handleConfirmPayment} variant="primary" className="w-full" disabled={isProcessing}>
+              {isProcessing ? 'Đang xử lý...' : 'Đã chuyển khoản'}
             </Button>
           </div>
+          {statusMsg && (
+            <p className={`text-sm ${statusType === 'success' ? 'text-green-600' : 'text-red-600'}`}>{statusMsg}</p>
+          )}
         </div>
       )}
     </Modal>

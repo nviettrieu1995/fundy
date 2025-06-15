@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import { User, UserMembershipType } from '../types'; // UserMembershipType is the enum for user.membership
 import { mockLogin, mockLogout, mockRegister } from '../services/authService';
 import { USER_MEMBERSHIP_PLANS } from '../constants'; // For default plan name
+import { purchaseCredits as purchaseCreditsAPI, upgradeMembership as upgradeMembershipAPI, PaymentResponse } from '../services/paymentService';
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +11,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (name: string, email: string, pass: string) => Promise<User | null>;
   updateUser: (updatedUser: Partial<User>) => void;
+  purchaseCredits: (amount: number) => Promise<PaymentResponse>;
+  upgradeMembershipPlan: (membership: UserMembershipType) => Promise<PaymentResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -84,9 +87,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  const purchaseCredits = useCallback(async (amount: number): Promise<PaymentResponse> => {
+    if (!user) return { success: false, message: 'User not logged in' };
+    const res = await purchaseCreditsAPI(user.id, amount);
+    if (res.success) {
+      updateUser({ credits: (user.credits || 0) + amount });
+    }
+    return res;
+  }, [user, updateUser]);
+
+  const upgradeMembershipPlan = useCallback(async (membership: UserMembershipType): Promise<PaymentResponse> => {
+    if (!user) return { success: false, message: 'User not logged in' };
+    const res = await upgradeMembershipAPI(user.id, membership);
+    if (res.success) {
+      updateUser({ membership, membershipPlanName: USER_MEMBERSHIP_PLANS[membership].name });
+    }
+    return res;
+  }, [user, updateUser]);
+
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, register, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, register, updateUser, purchaseCredits, upgradeMembershipPlan }}>
       {children}
     </AuthContext.Provider>
   );
