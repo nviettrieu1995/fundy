@@ -1,0 +1,36 @@
+// Prisma schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int              @id @default(autoincrement())
+  email            String           @unique
+  password         String
+  createdAt        DateTime         @default(now())
+  membershipPlanId Int?
+  membershipPlan   MembershipPlan?  @relation(fields: [membershipPlanId], references: [id])
+  transactions     Transaction[]
+}
+
+model MembershipPlan {
+  id    Int    @id @default(autoincrement())
+  name  String
+  price Float
+  users User[]
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  amount    Float
+  createdAt DateTime @default(now())
+}
